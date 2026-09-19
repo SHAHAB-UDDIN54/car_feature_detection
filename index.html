@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Price Prediction</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    padding: 30px;
+}
+
+.container {
+    width: 100%;
+    max-width: 1000px;
+    background: #fff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.2);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.header h1 {
+    font-size: 34px;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.header p {
+    font-size: 16px;
+    color: #64748b;
+}
+
+/* Upload Section */
+.upload-section {
+    background: #f8fafc;
+    border: 2px dashed #94a3b8;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.upload-section:hover {
+    border-color: #2563eb;
+    background: #f1f5f9;
+}
+
+.upload-section .icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.upload-section h3 {
+    color: #1e293b;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.upload-section p {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.upload-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.upload-btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.upload-btn.camera {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+}
+
+.upload-btn.camera:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(37,99,235,.3);
+}
+
+.upload-btn.gallery {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    color: white;
+}
+
+.upload-btn.gallery:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(124,58,237,.3);
+}
+
+.upload-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.image-preview {
+    margin-top: 20px;
+    display: none;
+    position: relative;
+    max-width: 100%;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 350px;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+}
+
+.image-preview .remove-image {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+.image-preview .remove-image:hover {
+    transform: scale(1.1);
+    background: #dc2626;
+}
+
+/* Camera Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+}
+
+.modal-content .close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 30px;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.3s ease;
+}
+
+.modal-content .close:hover {
+    color: #1e293b;
+    transform: rotate(90deg);
+}
+
+#video {
+    width: 100%;
+    border-radius: 12px;
+    background: #000;
+}
+
+.capture-btn {
+    margin-top: 20px;
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.capture-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(37,99,235,.3);
+}
+
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}
+
+@media(max-width:700px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+label .detected-badge {
+    display: inline-block;
+    background: #22c55e;
+    color: white;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+input, select {
+    width: 100%;
+    height: 55px;
+    padding: 0 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    transition: .3s;
+    background: #f8fafc;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #2563eb;
+    background: #fff;
+    box-shadow: 0 0 12px rgba(37,99,235,.2);
+}
+
+input:disabled, select:disabled {
+    background: #f1f5f9;
+    cursor: not-allowed;
+}
+
+input.detected {
+    border-color: #22c55e;
+    background: #f0fdf4;
+}
+
+select.detected {
+    border-color: #22c55e;
+    background: #f0fdf4;
+}
+
+/* Analyze & Predict Button */
+.analyze-btn {
+    margin-top: 30px;
+    width: 100%;
+    height: 60px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: .3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.analyze-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px rgba(34,197,94,.35);
+}
+
+.analyze-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Result */
+.result {
+    margin-top: 30px;
+    padding: 25px;
+    border-radius: 15px;
+    background: #ecfdf5;
+    border: 2px solid #22c55e;
+    text-align: center;
+    display: none;
+}
+
+.result h2 {
+    font-size: 18px;
+    color: #166534;
+}
+
+.result .price {
+    font-size: 42px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #15803d;
+}
+
+.result .features-detected {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f0fdf4;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.result .features-detected h3 {
+    font-size: 14px;
+    color: #166534;
+    margin-bottom: 10px;
+}
+
+.result .features-detected .feature-item {
+    display: inline-block;
+    background: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    margin: 4px;
+    font-size: 13px;
+    color: #1e293b;
+    border: 1px solid #bbf7d0;
+}
+
+.error {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fee2e2;
+    border: 2px solid #ef4444;
+    border-radius: 12px;
+    color: #991b1b;
+    display: none;
+    text-align: center;
+    font-weight: 500;
+}
+
+.loading {
+    display: none;
+    margin-top: 20px;
+    text-align: center;
+    padding: 30px;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.loading .spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #2563eb;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+.loading p {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.loading .sub-text {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 400;
+    margin-top: 5px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    margin-top: 15px;
+    overflow: hidden;
+}
+
+.progress-bar .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2563eb, #22c55e);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.analyzing-text {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🚗 Car Price Prediction</h1>
+        <p>Upload car image to auto-detect features and get instant price prediction</p>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="upload-section" id="uploadSection">
+        <div class="icon">📸</div>
+        <h3>Upload Car Image or Take Photo</h3>
+        <p>Upload a clear image of the car to detect its features and predict price</p>
+        <div class="upload-buttons">
+            <button class="upload-btn camera" id="cameraBtn">
+                📷 Take Photo
+            </button>
+            <button class="upload-btn gallery" id="galleryBtn">
+                🖼️ Upload Image
+            </button>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" style="display:none">
+        
+        <div class="image-preview" id="imagePreview">
+            <img id="previewImage" src="#" alt="Car Image">
+            <button class="remove-image" id="removeImage">✕</button>
+        </div>
+    </div>
+
+    <!-- Camera Modal -->
+    <div class="modal" id="cameraModal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <video id="video" autoplay></video>
+            <button class="capture-btn" id="captureBtn">📸 Capture Photo</button>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loading" id="loadingIndicator">
+        <div class="spinner"></div>
+        <p class="analyzing-text">🔍 Analyzing Car Image...</p>
+        <p class="sub-text">Detecting brand, model, year, and other features</p>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form id="predictionForm">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Brand * <span class="detected-badge" id="brandBadge" style="display:none">✓ Detected</span></label>
+                <select id="brand" required>
+                    <option value="">Select Brand</option>
+                    <option value="Toyota">Toyota</option>
+                    <option value="Honda">Honda</option>
+                    <option value="Suzuki">Suzuki</option>
+                    <option value="Mercedes">Mercedes</option>
+                    <option value="Audi">Audi</option>
+                    <option value="Lexus">Lexus</option>
+                    <option value="KIA">KIA</option>
+                    <option value="Hyundai">Hyundai</option>
+                    <option value="BMW">BMW</option>
+                    <option value="Ford">Ford</option>
+                    <option value="Nissan">Nissan</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Model Year * <span class="detected-badge" id="yearBadge" style="display:none">✓ Detected</span></label>
+                <input type="number" id="modelYear" placeholder="2023" required min="1990" max="2026">
+            </div>
+
+            <div class="form-group">
+                <label>Engine Capacity (CC) * <span class="detected-badge" id="engineBadge" style="display:none">✓ Detected</span></label>
+                <input type="number" id="engineCapacity" placeholder="1800" required min="500" max="8000">
+            </div>
+
+            <div class="form-group">
+                <label>Fuel Type * <span class="detected-badge" id="fuelBadge" style="display:none">✓ Detected</span></label>
+                <select id="fuelType" required>
+                    <option value="">Select Fuel</option>
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="Electric">Electric</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Color <span class="detected-badge" id="colorBadge" style="display:none">✓ Detected</span></label>
+                <input type="text" id="color" placeholder="White">
+            </div>
+
+            <div class="form-group">
+                <label>Condition * <span class="detected-badge" id="conditionBadge" style="display:none">✓ Detected</span></label>
+                <select id="condition" required>
+                    <option value="">Select Condition</option>
+                    <option value="New">New</option>
+                    <option value="Used">Used</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Transmission * <span class="detected-badge" id="transmissionBadge" style="display:none">✓ Detected</span></label>
+                <select id="transmission" required>
+                    <option value="">Select</option>
+                    <option value="Automatic">Automatic</option>
+                    <option value="Manual">Manual</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Mileage (KM) * <span class="detected-badge" id="mileageBadge" style="display:none">✓ Detected</span></label>
+                <input type="number" id="mileage" placeholder="45000" required min="0">
+            </div>
+        </div>
+
+        <button type="submit" class="analyze-btn" id="analyzeBtn">
+            🚀 Analyze Image & Predict Price
+        </button>
+    </form>
+
+    <!-- Result -->
+    <div class="result" id="resultCard">
+        <h2>✅ Estimated Price</h2>
+        <div class="price" id="predictedPrice">PKR 0</div>
+        
+        <div class="features-detected">
+            <h3>📋 Detected Car Features</h3>
+            <div id="detectedFeatures">
+                <span class="feature-item">🚗 Brand: <strong id="detectedBrand">-</strong></span>
+                <span class="feature-item">📅 Year: <strong id="detectedYear">-</strong></span>
+                <span class="feature-item">⚙️ Engine: <strong id="detectedEngine">-</strong> CC</span>
+                <span class="feature-item">⛽ Fuel: <strong id="detectedFuel">-</strong></span>
+                <span class="feature-item">🎨 Color: <strong id="detectedColor">-</strong></span>
+                <span class="feature-item">📌 Condition: <strong id="detectedCondition">-</strong></span>
+                <span class="feature-item">🔄 Transmission: <strong id="detectedTransmission">-</strong></span>
+                <span class="feature-item">📊 Mileage: <strong id="detectedMileage">-</strong> KM</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="error" id="errorMessage"></div>
+</div>
+
+<script>
+    // DOM Elements
+    const form = document.getElementById('predictionForm');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const resultCard = document.getElementById('resultCard');
+    const predictedPrice = document.getElementById('predictedPrice');
+    const errorMessage = document.getElementById('errorMessage');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const progressFill = document.getElementById('progressFill');
+
+    // Camera/Upload Elements
+    const cameraBtn = document.getElementById('cameraBtn');
+    const galleryBtn = document.getElementById('galleryBtn');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImage = document.getElementById('previewImage');
+    const removeImage = document.getElementById('removeImage');
+    const cameraModal = document.getElementById('cameraModal');
+    const closeModal = document.getElementById('closeModal');
+    const video = document.getElementById('video');
+    const captureBtn = document.getElementById('captureBtn');
+
+    // Detected feature display elements
+    const detectedFeatures = {
+        brand: document.getElementById('detectedBrand'),
+        year: document.getElementById('detectedYear'),
+        engine: document.getElementById('detectedEngine'),
+        fuel: document.getElementById('detectedFuel'),
+        color: document.getElementById('detectedColor'),
+        condition: document.getElementById('detectedCondition'),
+        transmission: document.getElementById('detectedTransmission'),
+        mileage: document.getElementById('detectedMileage')
+    };
+
+    let stream = null;
+    let capturedImage = null;
+    let isAnalyzing = false;
+
+    // Hide errors on input change
+    document.querySelectorAll('input, select').forEach(element => {
+        element.addEventListener('input', () => errorMessage.style.display = 'none');
+        element.addEventListener('change', () => errorMessage.style.display = 'none');
+    });
+
+    // Gallery Upload
+    galleryBtn.addEventListener('click', () => imageInput.click());
+
+    imageInput.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImage.src = event.target.result;
+                imagePreview.style.display = 'block';
+                capturedImage = event.target.result;
+                errorMessage.style.display = 'none';
+                // Auto-analyze after upload
+                analyzeImage();
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    // Remove Image
+    removeImage.addEventListener('click', function() {
+        imagePreview.style.display = 'none';
+        previewImage.src = '#';
+        capturedImage = null;
+        imageInput.value = '';
+        clearDetectedFeatures();
+    });
+
+    // Camera
+    cameraBtn.addEventListener('click', async function() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment' } 
+            });
+            video.srcObject = stream;
+            cameraModal.style.display = 'flex';
+        } catch (err) {
+            showError('Unable to access camera. Please check permissions.');
+        }
+    });
+
+    closeModal.addEventListener('click', closeCamera);
+    window.addEventListener('click', function(e) {
+        if (e.target === cameraModal) closeCamera();
+    });
+
+    captureBtn.addEventListener('click', function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        capturedImage = canvas.toDataURL('image/jpeg');
+        previewImage.src = capturedImage;
+        imagePreview.style.display = 'block';
+        closeCamera();
+        errorMessage.style.display = 'none';
+        // Auto-analyze after capture
+        analyzeImage();
+    });
+
+    function closeCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+        cameraModal.style.display = 'none';
+    }
+
+    // Main Analysis Function
+    async function analyzeImage() {
+        if (!capturedImage || isAnalyzing) return;
+
+        isAnalyzing = true;
+        analyzeBtn.disabled = true;
+        analyzeBtn.innerHTML = '⏳ Analyzing...';
+        loadingIndicator.style.display = 'block';
+        resultCard.style.display = 'none';
+        errorMessage.style.display = 'none';
+        progressFill.style.width = '0%';
+
+        try {
+            // Simulate progressive analysis
+            const steps = [
+                { progress: 20, text: '📸 Analyzing image quality...' },
+                { progress: 40, text: '🔍 Detecting car brand and model...' },
+                { progress: 60, text: '⚙️ Identifying engine and features...' },
+                { progress: 80, text: '📊 Calculating market value...' },
+                { progress: 100, text: '✅ Analysis complete!' }
+            ];
+
+            for (const step of steps) {
+                await sleep(500);
+                progressFill.style.width = step.progress + '%';
+                document.querySelector('.loading .analyzing-text').textContent = step.text;
+            }
+
+            // Simulate AI detection - This is where you'd call your actual API
+            const detectedData = await simulateAIDetection();
+
+            // Auto-fill form with detected data
+            fillFormWithDetectedData(detectedData);
+
+            // Update detected features display
+            updateDetectedFeaturesDisplay(detectedData);
+
+            // Calculate and display price
+            await calculateAndDisplayPrice(detectedData);
+
+        } catch (err) {
+            console.error('Analysis error:', err);
+            showError('Error analyzing image. Please fill in details manually.');
+        } finally {
+            isAnalyzing = false;
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = '🚀 Analyze Image & Predict Price';
+            loadingIndicator.style.display = 'none';
+        }
+    }
+
+    // Simulate AI Detection (Replace with actual API call)
+    function simulateAIDetection() {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                // Simulated detected features
+                const carData = {
+                    brand: ['Toyota', 'Honda', 'Suzuki', 'Mercedes', 'Audi', 'BMW'][Math.floor(Math.random() * 6)],
+                    modelYear: Math.floor(Math.random() * (2024 - 2015) + 2015),
+                    engineCapacity: [1200, 1400, 1600, 1800, 2000, 2400][Math.floor(Math.random() * 6)],
+                    fuelType: ['Petrol', 'Diesel', 'Hybrid', 'Electric'][Math.floor(Math.random() * 4)],
+                    color: ['White', 'Black', 'Silver', 'Blue', 'Red', 'Gray'][Math.floor(Math.random() * 6)],
+                    condition: ['New', 'Used'][Math.floor(Math.random() * 2)],
+                    transmission: ['Automatic', 'Manual'][Math.floor(Math.random() * 2)],
+                    mileage: Math.floor(Math.random() * (80000 - 10000) + 10000)
+                };
+                resolve(carData);
+            }, 2500);
+        });
+    }
+
+    function fillFormWithDetectedData(data) {
+        // Fill form fields
+        document.getElementById('brand').value = data.brand;
+        document.getElementById('modelYear').value = data.modelYear;
+        document.getElementById('engineCapacity').value = data.engineCapacity;
+        document.getElementById('fuelType').value = data.fuelType;
+        document.getElementById('color').value = data.color;
+        document.getElementById('condition').value = data.condition;
+        document.getElementById('transmission').value = data.transmission;
+        document.getElementById('mileage').value = data.mileage;
+
+        // Add detected class
+        document.querySelectorAll('input, select').forEach(el => {
+            if (el.value) el.classList.add('detected');
+        });
+
+        // Show detected badges
+        document.getElementById('brandBadge').style.display = 'inline';
+        document.getElementById('yearBadge').style.display = 'inline';
+        document.getElementById('engineBadge').style.display = 'inline';
+        document.getElementById('fuelBadge').style.display = 'inline';
+        document.getElementById('colorBadge').style.display = 'inline';
+        document.getElementById('conditionBadge').style.display = 'inline';
+        document.getElementById('transmissionBadge').style.display = 'inline';
+        document.getElementById('mileageBadge').style.display = 'inline';
+    }
+
+    function updateDetectedFeaturesDisplay(data) {
+        detectedFeatures.brand.textContent = data.brand;
+        detectedFeatures.year.textContent = data.modelYear;
+        detectedFeatures.engine.textContent = data.engineCapacity;
+        detectedFeatures.fuel.textContent = data.fuelType;
+        detectedFeatures.color.textContent = data.color;
+        detectedFeatures.condition.textContent = data.condition;
+        detectedFeatures.transmission.textContent = data.transmission;
+        detectedFeatures.mileage.textContent = data.mileage.toLocaleString();
+    }
+
+    function clearDetectedFeatures() {
+        document.querySelectorAll('.detected-badge').forEach(badge => badge.style.display = 'none');
+        document.querySelectorAll('.detected').forEach(el => el.classList.remove('detected'));
+        Object.values(detectedFeatures).forEach(el => el.textContent = '-');
+    }
+
+    async function calculateAndDisplayPrice(data) {
+        // Calculate price based on detected features
+        const basePrice = calculatePrice(data);
+        
+        // Format price
+        const formattedPrice = basePrice.toLocaleString('en-PK');
+        predictedPrice.textContent = `PKR ${formattedPrice}`;
+        
+        // Show result
+        resultCard.style.display = 'block';
+        errorMessage.style.display = 'none';
+        
+        // Scroll to result
+        resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function calculatePrice(data) {
+        // Base price logic
+        let basePrice = 1000000;
+
+        // Brand factor
+        const brandFactors = {
+            'Toyota': 1.2,
+            'Honda': 1.15,
+            'Suzuki': 1.0,
+            'Mercedes': 2.5,
+            'Audi': 2.3,
+            'BMW': 2.4,
+            'Lexus': 2.0,
+            'KIA': 0.9,
+            'Hyundai': 0.95,
+            'Ford': 1.1,
+            'Nissan': 1.05
+        };
+        const brandFactor = brandFactors[data.brand] || 1.0;
+
+        // Year factor (newer = higher)
+        const yearFactor = (data.modelYear - 2010) * 0.08;
+
+        // Engine factor
+        const engineFactor = data.engineCapacity / 1800;
+
+        // Fuel factor
+        const fuelFactors = {
+            'Petrol': 1.0,
+            'Diesel': 1.1,
+            'Hybrid': 1.2,
+            'Electric': 1.3
+        };
+        const fuelFactor = fuelFactors[data.fuelType] || 1.0;
+
+        // Condition factor
+        const conditionFactor = data.condition === 'New' ? 1.3 : 1.0;
+
+        // Transmission factor
+        const transmissionFactor = data.transmission === 'Automatic' ? 1.15 : 1.0;
+
+        // Mileage factor (higher mileage = lower price)
+        const mileageFactor = Math.max(0.4, 1 - (data.mileage / 200000));
+
+        // Calculate final price
+        let price = basePrice * brandFactor * (1 + yearFactor) * engineFactor * fuelFactor * conditionFactor * transmissionFactor * mileageFactor;
+
+        // Random market variation
+        price = price * (0.9 + Math.random() * 0.2);
+
+        // Ensure price is within reasonable range
+        price = Math.max(200000, Math.min(price, 15000000));
+
+        // Round to nearest 5000
+        return Math.round(price / 5000) * 5000;
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Form submit
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await analyzeImage();
+    });
+
+    function showError(message) {
+        errorMessage.innerText = message;
+        errorMessage.style.display = 'block';
+        resultCard.style.display = 'none';
+    }
+</script>
+</body>
+</html>
